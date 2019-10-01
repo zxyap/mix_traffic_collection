@@ -238,6 +238,14 @@ def normal(ip):
 
         count = 0
 
+        # Kill chrome processes to clear memory to avoid virtual memory problem
+        parent = psutil.Process(driver.service.process.pid)
+        chromeProcesses = (parent.children(recursive=True))
+        if chromeProcesses != "":
+        	for process in chromeProcesses:
+        		p = psutil.Process(process.pid)
+        		p.kill()
+
         try:
             driver.quit()
         except TimeoutException as toe:
@@ -248,7 +256,6 @@ def normal(ip):
             driver.close()
         finally:
             driver.quit()
-
 
     # Terminate selenium
     try:
@@ -306,8 +313,9 @@ if __name__ == '__main__' :
         length = len(dictionary_dos)
 
     logging.basicConfig(filename='mixed_traffic.log', level=logging.INFO, format='%(asctime)s-%(levelname)s-%(message)s')
-
-    file_path = os.path.join("output/mixed_traffic/" + datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S"))
+    location = "/media/sf_Shared/mixed/"
+    #location = "output/"
+    file_path = os.path.join(location + "mixed_traffic/" + datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S"))
     if not os.path.exists(file_path):
         os.makedirs(file_path)
 ####################for single testing########################################
