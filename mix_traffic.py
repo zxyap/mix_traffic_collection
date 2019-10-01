@@ -150,7 +150,7 @@ def normal(ip):
         isNormal = 1 
 
         while 1 and isAttacking == 1 :
-            count += 1
+            count = 1 #make counter a non factor
             return_code = sts.poll()
             if return_code == 0 or count >= timeout:
                 if return_code == 0:
@@ -273,7 +273,7 @@ def attack(ip):
     logging.info("Opened DOS attack at " + ip)
 
     # Sleeping for 25 seconds before killing them off
-    time.sleep(25)
+    time.sleep(60)
     kill_thc = "killall -s SIGTERM thc-ssl-dos"
     kill_sniff = "killall -s SIGTERM  tshark"
     os.system(kill_thc)
