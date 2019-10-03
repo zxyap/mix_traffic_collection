@@ -70,11 +70,13 @@ def normal(ip):
         options.add_argument('--ignore-certificate-errors-spki-list')
         options.add_argument('--ignore-ssl-errors')
         options.add_argument('--no-sandbox')
+        options.add_argument('--headless')
+        options.add_argument('--disable-dev-shm-usage')
         try:
             driver = webdriver.Chrome(chromeDriverPath, options=options)
         except SessionNotCreatedException as snce:
             logging.exception(str(snce) + " session failed to create")
-            continue
+            pass
 
         # Setting a timeout for the page load to hasten the process
         driver.set_page_load_timeout(time_to_wait=30)
@@ -135,11 +137,11 @@ def normal(ip):
         except TimeoutException as toe:
             print("Timeout, moving onto next site")
             logging.exception(str(toe) + " for " + domain_urllib)
-            continue
+            pass
         except InvalidSessionIdException as isie:
             print("Invalid session id, moving on to the next site")
             logging.exception(str(isie) + " for " + domain_urllib)
-            continue
+            pass
 
         # This polls for the return code of the tshark process, once 200 packets have been captured, expected return : 0
         count = 0
@@ -232,7 +234,7 @@ def normal(ip):
                             finally:
                                 break
                 else:
-                    continue
+                    pass
 
 
 
@@ -265,8 +267,14 @@ def normal(ip):
         driver.close()  
 
 def attack(ip):
+    count = 0
     while isNormal == 0 : 
         time.sleep(1)
+        count = count + 1
+        if count == 60 : 
+            global isAttacking
+            isAttacking = 0
+            return 
     print('ready to attack at ' + str(ip))
 
     # Initializer for thc-ssl-dos
@@ -286,7 +294,6 @@ def attack(ip):
     os.system(kill_thc)
     os.system(kill_sniff)
 
-    global isAttacking
     isAttacking = 0;
     print('THE ATTACK HAS STOPPED. Exiting the attack thread..')
     logging.info("DDOS finished for " + ip)
@@ -313,7 +320,7 @@ if __name__ == '__main__' :
         length = len(dictionary_dos)
 
     logging.basicConfig(filename='mixed_traffic.log', level=logging.INFO, format='%(asctime)s-%(levelname)s-%(message)s')
-    location = "/media/sf_Shared/mixed/"
+    location = "/media/sf_Shared2/mixed/"
     #location = "output/"
     file_path = os.path.join(location + "mixed_traffic/" + datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S"))
     if not os.path.exists(file_path):
@@ -337,13 +344,13 @@ if __name__ == '__main__' :
     #sts = subprocess.Popen(command, shell=False)
     #time.sleep(5)
 
-    #normal = threading.Thread(target=normal, args=(ip_normal,))
-    #normal.start()
-    #attack = threading.Thread(target=attack, args=(ip_dos,))
-    #attack.start()
+    #normal_t = threading.Thread(target=normal, args=(ip_normal,))
+    #normal_t.start()
+    #attack_t = threading.Thread(target=attack, args=(ip_dos,))
+    #attack_t.start()
 ##############################################################################
 
-    for i in range(length):
+    for i in range(814, length):
         ip_dos = ip_list_dos[i]
         ip_normal = ip_list_normal[i]
         print("normal at " + ip_normal)
